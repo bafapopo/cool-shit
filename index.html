@@ -5,10 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>冥想倒數計時器</title>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
+    * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
     
     @keyframes pulse-ring {
@@ -64,24 +74,25 @@
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
  </head>
- <body class="h-full">
-  <div id="app-wrapper" class="w-full h-full overflow-auto">
-   <main class="min-h-full flex items-center justify-center p-8">
-    <div class="text-center w-full max-w-2xl float-animation">
-     <h1 id="timer-title" class="text-4xl md:text-5xl font-bold mb-16 tracking-tight">冥想時光</h1>
-     <div class="relative inline-block mb-12">
-      <div id="timer-ring" class="absolute inset-0 rounded-full border-8 opacity-30 pulse-animation" style="border-color: rgba(255, 255, 255, 0.3);"></div>
-      <div id="timer-display" class="relative z-10 text-8xl md:text-9xl font-black tracking-tighter py-16 px-12">
+ <body style="height: 100%;">
+  <div id="app-wrapper" style="width: 100%; height: 100%; overflow: auto;">
+   <main style="min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;">
+    <div style="text-align: center; width: 100%; max-width: 56rem;" class="float-animation">
+     <h1 id="timer-title" style="font-size: 3rem; font-weight: 700; margin-bottom: 4rem; letter-spacing: -0.025em;">冥想時光</h1>
+     <div style="position: relative; display: inline-block; margin-bottom: 3rem;">
+      <div id="timer-ring" class="pulse-animation" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 9999px; border: 8px solid rgba(255, 255, 255, 0.3); opacity: 0.3;"></div>
+      <div id="timer-display" style="position: relative; z-index: 10; font-size: 6rem; font-weight: 900; letter-spacing: -0.05em; padding: 4rem 3rem;">
        15:00
       </div>
      </div>
-     <div id="completion-message" class="hidden mb-8">
-      <p id="completion-text" class="text-3xl md:text-4xl font-bold completion-animation">時間到！</p>
+     <div id="completion-message" style="display: none; margin-bottom: 2rem;">
+      <p id="completion-text" class="completion-animation" style="font-size: 2.5rem; font-weight: 700;">時間到！</p>
      </div>
-     <div class="flex flex-wrap gap-4 justify-center items-center"><button id="start-btn" class="px-10 py-4 text-xl font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"> 開始 </button> <button id="pause-btn" class="hidden px-10 py-4 text-xl font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"> 暫停 </button> <button id="reset-btn" class="px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 active:scale-95"> 重設 </button>
+     <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center;"><button id="start-btn" style="padding: 1rem 2.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.15);"> 開始 </button> <button id="pause-btn" style="display: none; padding: 1rem 2.5rem; font-size: 1.25rem; font-weight: 700; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s; box-shadow: 0 10px 25px rgba(0,0,0,0.15);"> 暫停 </button> <button id="reset-btn" style="padding: 1rem 2rem; font-size: 1.125rem; font-weight: 600; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s;"> 重設 </button>
      </div>
-     <div class="mt-12 flex flex-wrap gap-3 justify-center"><button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="5">5 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="10">10 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105 ring-2" data-minutes="15">15 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="20">20 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="30">30 分鐘</button>
+     <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;"><button class="time-preset" style="padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s;" data-minutes="5">5 分鐘</button> <button class="time-preset" style="padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s;" data-minutes="10">10 分鐘</button> <button class="time-preset active-preset" style="padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; border-radius: 9999px; border: 2px solid; cursor: pointer; transition: all 0.3s;" data-minutes="15">15 分鐘</button> <button class="time-preset" style="padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s;" data-minutes="20">20 分鐘</button> <button class="time-preset" style="padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 500; border-radius: 9999px; border: none; cursor: pointer; transition: all 0.3s;" data-minutes="30">30 分鐘</button>
      </div>
     </div>
    </main>
@@ -129,9 +140,9 @@
       if (isRunning) return;
       
       isRunning = true;
-      document.getElementById('start-btn').classList.add('hidden');
-      document.getElementById('pause-btn').classList.remove('hidden');
-      document.getElementById('completion-message').classList.add('hidden');
+      document.getElementById('start-btn').style.display = 'none';
+      document.getElementById('pause-btn').style.display = 'inline-block';
+      document.getElementById('completion-message').style.display = 'none';
       
       timerInterval = setInterval(() => {
         remainingSeconds--;
@@ -147,40 +158,44 @@
     function pauseTimer() {
       isRunning = false;
       clearInterval(timerInterval);
-      document.getElementById('start-btn').classList.remove('hidden');
-      document.getElementById('pause-btn').classList.add('hidden');
+      document.getElementById('start-btn').style.display = 'inline-block';
+      document.getElementById('pause-btn').style.display = 'none';
     }
 
     function stopTimer() {
       isRunning = false;
       clearInterval(timerInterval);
-      document.getElementById('start-btn').classList.remove('hidden');
-      document.getElementById('pause-btn').classList.add('hidden');
+      document.getElementById('start-btn').style.display = 'inline-block';
+      document.getElementById('pause-btn').style.display = 'none';
     }
 
     function resetTimer() {
       stopTimer();
       remainingSeconds = selectedMinutes * 60;
       updateDisplay();
-      document.getElementById('completion-message').classList.add('hidden');
+      document.getElementById('completion-message').style.display = 'none';
     }
 
     function showCompletion() {
-      document.getElementById('completion-message').classList.remove('hidden');
+      document.getElementById('completion-message').style.display = 'block';
       playCompletionSound();
     }
 
-    function setPresetTime(minutes) {
+    function setPresetTime(minutes, clickedBtn) {
       selectedMinutes = minutes;
       remainingSeconds = minutes * 60;
       updateDisplay();
       stopTimer();
-      document.getElementById('completion-message').classList.add('hidden');
+      document.getElementById('completion-message').style.display = 'none';
       
       document.querySelectorAll('.time-preset').forEach(btn => {
-        btn.classList.remove('ring-2');
+        btn.classList.remove('active-preset');
+        btn.style.border = 'none';
       });
-      event.target.classList.add('ring-2');
+      if (clickedBtn) {
+        clickedBtn.classList.add('active-preset');
+        clickedBtn.style.border = '2px solid';
+      }
     }
 
     document.getElementById('start-btn').addEventListener('click', startTimer);
@@ -190,7 +205,7 @@
     document.querySelectorAll('.time-preset').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const minutes = parseInt(e.target.dataset.minutes);
-        setPresetTime(minutes);
+        setPresetTime(minutes, e.target);
       });
     });
 
@@ -322,5 +337,5 @@
       onConfigChange(defaultConfig);
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aead2d5730f4a6c',t:'MTc2NTg1MjkwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aead58860804a6c',t:'MTc2NTg1MzAxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
