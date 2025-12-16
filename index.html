@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-TW" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>冥想倒數計時器</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.95);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.7;
+      }
+      100% {
+        transform: scale(0.95);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    
+    .pulse-animation {
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
+    
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes completion-burst {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .completion-animation {
+      animation: completion-burst 0.6s ease-out;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app-wrapper" class="w-full h-full overflow-auto">
+   <main class="min-h-full flex items-center justify-center p-8">
+    <div class="text-center w-full max-w-2xl float-animation">
+     <h1 id="timer-title" class="text-4xl md:text-5xl font-bold mb-16 tracking-tight">冥想時光</h1>
+     <div class="relative inline-block mb-12">
+      <div id="timer-ring" class="absolute inset-0 rounded-full border-8 opacity-30 pulse-animation" style="border-color: rgba(255, 255, 255, 0.3);"></div>
+      <div id="timer-display" class="relative z-10 text-8xl md:text-9xl font-black tracking-tighter py-16 px-12">
+       15:00
+      </div>
+     </div>
+     <div id="completion-message" class="hidden mb-8">
+      <p id="completion-text" class="text-3xl md:text-4xl font-bold completion-animation">時間到！</p>
+     </div>
+     <div class="flex flex-wrap gap-4 justify-center items-center"><button id="start-btn" class="px-10 py-4 text-xl font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"> 開始 </button> <button id="pause-btn" class="hidden px-10 py-4 text-xl font-bold rounded-full transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg"> 暫停 </button> <button id="reset-btn" class="px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 hover:scale-105 active:scale-95"> 重設 </button>
+     </div>
+     <div class="mt-12 flex flex-wrap gap-3 justify-center"><button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="5">5 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="10">10 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105 ring-2" data-minutes="15">15 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="20">20 分鐘</button> <button class="time-preset px-6 py-3 text-base font-medium rounded-full transition-all duration-300 hover:scale-105" data-minutes="30">30 分鐘</button>
+     </div>
+    </div>
+   </main>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#667eea",
+      surface_color: "#764ba2",
+      text_color: "#ffffff",
+      primary_action_color: "#ffffff",
+      secondary_action_color: "rgba(255, 255, 255, 0.2)",
+      font_family: "system-ui",
+      font_size: 16,
+      timer_title: "冥想時光",
+      start_button_text: "開始",
+      pause_button_text: "暫停",
+      reset_button_text: "重設",
+      completion_message: "時間到！"
+    };
+
+    let timerInterval = null;
+    let remainingSeconds = 900;
+    let isRunning = false;
+    let selectedMinutes = 15;
+
+    function playCompletionSound() {
+      // 使用視覺動畫提示完成
+      const completionMsg = document.getElementById('completion-message');
+      const timerRing = document.getElementById('timer-ring');
+      timerRing.style.animation = 'pulse-ring 0.5s ease-in-out 3';
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateDisplay() {
+      const timerDisplay = document.getElementById('timer-display');
+      timerDisplay.textContent = formatTime(remainingSeconds);
+    }
+
+    function startTimer() {
+      if (isRunning) return;
+      
+      isRunning = true;
+      document.getElementById('start-btn').classList.add('hidden');
+      document.getElementById('pause-btn').classList.remove('hidden');
+      document.getElementById('completion-message').classList.add('hidden');
+      
+      timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateDisplay();
+        
+        if (remainingSeconds <= 0) {
+          stopTimer();
+          showCompletion();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('start-btn').classList.remove('hidden');
+      document.getElementById('pause-btn').classList.add('hidden');
+    }
+
+    function stopTimer() {
+      isRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('start-btn').classList.remove('hidden');
+      document.getElementById('pause-btn').classList.add('hidden');
+    }
+
+    function resetTimer() {
+      stopTimer();
+      remainingSeconds = selectedMinutes * 60;
+      updateDisplay();
+      document.getElementById('completion-message').classList.add('hidden');
+    }
+
+    function showCompletion() {
+      document.getElementById('completion-message').classList.remove('hidden');
+      playCompletionSound();
+    }
+
+    function setPresetTime(minutes) {
+      selectedMinutes = minutes;
+      remainingSeconds = minutes * 60;
+      updateDisplay();
+      stopTimer();
+      document.getElementById('completion-message').classList.add('hidden');
+      
+      document.querySelectorAll('.time-preset').forEach(btn => {
+        btn.classList.remove('ring-2');
+      });
+      event.target.classList.add('ring-2');
+    }
+
+    document.getElementById('start-btn').addEventListener('click', startTimer);
+    document.getElementById('pause-btn').addEventListener('click', pauseTimer);
+    document.getElementById('reset-btn').addEventListener('click', resetTimer);
+    
+    document.querySelectorAll('.time-preset').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const minutes = parseInt(e.target.dataset.minutes);
+        setPresetTime(minutes);
+      });
+    });
+
+    async function onConfigChange(config) {
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryActionColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryActionColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+      
+      const appWrapper = document.getElementById('app-wrapper');
+      appWrapper.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${surfaceColor} 100%)`;
+      appWrapper.style.fontFamily = `${fontFamily}, system-ui, -apple-system, sans-serif`;
+      
+      const timerTitle = document.getElementById('timer-title');
+      timerTitle.style.color = textColor;
+      timerTitle.style.fontSize = `${fontSize * 2.5}px`;
+      timerTitle.textContent = config.timer_title || defaultConfig.timer_title;
+      
+      const timerDisplay = document.getElementById('timer-display');
+      timerDisplay.style.color = textColor;
+      timerDisplay.style.fontSize = `${fontSize * 5.5}px`;
+      
+      const timerRing = document.getElementById('timer-ring');
+      timerRing.style.borderColor = `${textColor}40`;
+      
+      const completionText = document.getElementById('completion-text');
+      completionText.style.color = textColor;
+      completionText.style.fontSize = `${fontSize * 2.25}px`;
+      completionText.textContent = config.completion_message || defaultConfig.completion_message;
+      
+      const startBtn = document.getElementById('start-btn');
+      startBtn.style.backgroundColor = primaryActionColor;
+      startBtn.style.color = bgColor;
+      startBtn.style.fontSize = `${fontSize * 1.25}px`;
+      startBtn.textContent = config.start_button_text || defaultConfig.start_button_text;
+      
+      const pauseBtn = document.getElementById('pause-btn');
+      pauseBtn.style.backgroundColor = primaryActionColor;
+      pauseBtn.style.color = bgColor;
+      pauseBtn.style.fontSize = `${fontSize * 1.25}px`;
+      pauseBtn.textContent = config.pause_button_text || defaultConfig.pause_button_text;
+      
+      const resetBtn = document.getElementById('reset-btn');
+      resetBtn.style.backgroundColor = secondaryActionColor;
+      resetBtn.style.color = textColor;
+      resetBtn.style.fontSize = `${fontSize * 1.125}px`;
+      resetBtn.textContent = config.reset_button_text || defaultConfig.reset_button_text;
+      
+      document.querySelectorAll('.time-preset').forEach(btn => {
+        btn.style.backgroundColor = secondaryActionColor;
+        btn.style.color = textColor;
+        btn.style.fontSize = `${fontSize}px`;
+        btn.style.borderColor = textColor;
+      });
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["timer_title", config.timer_title || defaultConfig.timer_title],
+          ["start_button_text", config.start_button_text || defaultConfig.start_button_text],
+          ["pause_button_text", config.pause_button_text || defaultConfig.pause_button_text],
+          ["reset_button_text", config.reset_button_text || defaultConfig.reset_button_text],
+          ["completion_message", config.completion_message || defaultConfig.completion_message]
+        ])
+      });
+      
+      onConfigChange(window.elementSdk.config);
+    } else {
+      onConfigChange(defaultConfig);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aead2d5730f4a6c',t:'MTc2NTg1MjkwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
