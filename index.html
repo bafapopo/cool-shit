@@ -71,6 +71,42 @@
     .completion-animation {
       animation: completion-burst 0.6s ease-out;
     }
+    
+    @keyframes walk {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+    
+    @keyframes wing-flap {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      50% {
+        transform: rotate(-15deg);
+      }
+    }
+    
+    @keyframes foot-step-left {
+      0%, 50%, 100% {
+        transform: rotate(0deg);
+      }
+      25% {
+        transform: rotate(-20deg);
+      }
+    }
+    
+    @keyframes foot-step-right {
+      0%, 50%, 100% {
+        transform: rotate(0deg);
+      }
+      75% {
+        transform: rotate(20deg);
+      }
+    }
   </style>
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
@@ -80,7 +116,29 @@
   <div id="app-wrapper" style="width: 100%; height: 100%; overflow: auto;">
    <main style="min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem;">
     <div style="text-align: center; width: 100%; max-width: 56rem;" class="float-animation">
-     <h1 id="timer-title" style="font-size: 3rem; font-weight: 700; margin-bottom: 4rem; letter-spacing: -0.025em;">冥想時光</h1>
+     <h1 id="timer-title" style="font-size: 3rem; font-weight: 700; margin-bottom: 4rem; letter-spacing: -0.025em;">冥想時光</h1><!-- 爬山場景 -->
+     <div id="mountain-scene" style="position: relative; margin-bottom: 2rem; height: 280px; overflow: hidden; background: linear-gradient(to bottom, rgba(135, 206, 235, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%); border-radius: 20px; padding: 20px;"><!-- 太陽 -->
+      <svg width="60" height="60" viewbox="0 0 60 60" style="position: absolute; right: 40px; top: 20px;"><circle cx="30" cy="30" r="20" fill="#FFE66D" opacity="0.9" /> <circle cx="30" cy="30" r="15" fill="#FFF176" />
+      </svg><!-- 雲朵 -->
+      <svg width="80" height="40" viewbox="0 0 80 40" style="position: absolute; left: 60px; top: 30px; opacity: 0.6;"><ellipse cx="25" cy="25" rx="20" ry="15" fill="white" /> <ellipse cx="45" cy="25" rx="18" ry="13" fill="white" /> <ellipse cx="35" cy="20" rx="15" ry="12" fill="white" />
+      </svg>
+      <svg width="70" height="35" viewbox="0 0 70 35" style="position: absolute; right: 100px; top: 50px; opacity: 0.5;"><ellipse cx="20" cy="20" rx="18" ry="12" fill="white" /> <ellipse cx="40" cy="20" rx="16" ry="11" fill="white" /> <ellipse cx="30" cy="15" rx="13" ry="10" fill="white" />
+      </svg><!-- 山的背景 SVG -->
+      <svg id="mountain-path" width="100%" height="200" viewbox="0 0 800 200" preserveaspectratio="none" style="position: absolute; bottom: 0; left: 0;"><!-- 遠山 --> <path d="M 0 150 L 200 80 L 400 120 L 600 70 L 800 130 L 800 200 L 0 200 Z" fill="rgba(147, 197, 114, 0.3)" /> <!-- 中山 --> <path d="M 0 180 L 150 120 L 300 140 L 500 100 L 650 140 L 800 160 L 800 200 L 0 200 Z" fill="rgba(147, 197, 114, 0.5)" /> <!-- 主要爬山路徑 --> <path id="climbing-path" d="M 0 200 Q 200 180, 400 140 T 800 80" stroke="rgba(139, 90, 43, 0.6)" stroke-width="8" fill="none" stroke-dasharray="15,10" stroke-linecap="round" /> <!-- 前山 --> <path d="M 0 190 L 100 160 L 250 170 L 400 150 L 550 165 L 700 155 L 800 180 L 800 200 L 0 200 Z" fill="rgba(106, 168, 79, 0.7)" />
+      </svg><!-- 爬山的Q版小雞 -->
+      <svg id="climbing-chick" width="70" height="70" viewbox="0 0 100 100" style="position: absolute; left: 0; bottom: 0; transform-origin: center center;"><!-- 小雞身體 --> <ellipse cx="50" cy="55" rx="28" ry="32" fill="#FFD93D" stroke="#FFA500" stroke-width="2" /> <!-- 小雞頭 --> <circle cx="50" cy="35" r="20" fill="#FFD93D" stroke="#FFA500" stroke-width="2" /> <!-- 眼睛 --> <circle cx="44" cy="32" r="3" fill="#000" /> <circle cx="56" cy="32" r="3" fill="#000" /> <circle cx="45" cy="31" r="1.5" fill="#fff" /> <circle cx="57" cy="31" r="1.5" fill="#fff" /> <!-- 嘴巴 --> <polygon points="50,38 46,42 54,42" fill="#FF6B35" /> <!-- 翅膀 --> <ellipse id="climb-wing-left" cx="32" cy="55" rx="10" ry="18" fill="#FFB84D" stroke="#FFA500" stroke-width="1.5" /> <ellipse id="climb-wing-right" cx="68" cy="55" rx="10" ry="18" fill="#FFB84D" stroke="#FFA500" stroke-width="1.5" /> <!-- 腳 --> <g id="climb-feet">
+        <line id="climb-left-foot" x1="42" y1="85" x2="38" y2="92" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+        <line x1="38" y1="92" x2="34" y2="92" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" />
+        <line x1="38" y1="92" x2="42" y2="92" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" />
+        <line id="climb-right-foot" x1="58" y1="85" x2="62" y2="92" stroke="#FF6B35" stroke-width="3" stroke-linecap="round" />
+        <line x1="62" y1="92" x2="58" y2="92" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" />
+        <line x1="62" y1="92" x2="66" y2="92" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" />
+       </g>
+      </svg><!-- 進度文字 -->
+      <div id="climb-progress" style="position: absolute; top: 20px; left: 20px; font-size: 1.2rem; font-weight: 700; color: rgba(255, 255, 255, 0.9); text-shadow: 2px 2px 4px rgba(0,0,0,0.3); display: none;">
+       爬山中... <span id="climb-percentage">0%</span>
+      </div>
+     </div>
      <div style="position: relative; display: inline-block; margin-bottom: 3rem;">
       <div id="timer-ring" class="pulse-animation" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 9999px; border: 8px solid rgba(255, 255, 255, 0.3); opacity: 0.3;"></div>
       <div id="timer-display" style="position: relative; z-index: 10; font-size: 6rem; font-weight: 900; letter-spacing: -0.05em; padding: 4rem 3rem;">
@@ -117,6 +175,73 @@
     let remainingSeconds = 900;
     let isRunning = false;
     let selectedMinutes = 15;
+    let chickPosition = 0;
+    let chickAnimationInterval = null;
+
+    function startChickWalking() {
+      const chick = document.getElementById('climbing-chick');
+      const container = document.getElementById('mountain-scene');
+      const progressText = document.getElementById('climb-progress');
+      const percentageSpan = document.getElementById('climb-percentage');
+      const containerWidth = container.offsetWidth;
+      chickPosition = 0;
+      
+      progressText.style.display = 'block';
+      
+      // 加入爬山動畫
+      chick.style.animation = 'walk 0.6s ease-in-out infinite';
+      document.getElementById('climb-wing-left').style.animation = 'wing-flap 0.6s ease-in-out infinite';
+      document.getElementById('climb-wing-right').style.animation = 'wing-flap 0.6s ease-in-out infinite';
+      document.getElementById('climb-left-foot').style.animation = 'foot-step-left 0.6s ease-in-out infinite';
+      document.getElementById('climb-right-foot').style.animation = 'foot-step-right 0.6s ease-in-out infinite';
+      
+      chickAnimationInterval = setInterval(() => {
+        if (!isRunning) return;
+        
+        // 計算總時間進度
+        const totalSeconds = selectedMinutes * 60;
+        const elapsedSeconds = totalSeconds - remainingSeconds;
+        const progress = elapsedSeconds / totalSeconds;
+        
+        // 沿著曲線路徑移動（從左下到右上）
+        const xPosition = progress * (containerWidth - 70);
+        
+        // 使用二次曲線計算 Y 位置（從下往上爬）
+        const startY = 200;
+        const endY = 80;
+        const yPosition = startY - (startY - endY) * progress;
+        
+        // 計算傾斜角度（爬山時身體向前傾）
+        const tilt = -10 - (progress * 15); // 越往上爬越傾斜
+        
+        chick.style.left = xPosition + 'px';
+        chick.style.bottom = (yPosition - 200) + 'px';
+        chick.style.transform = `rotate(${tilt}deg)`;
+        
+        // 更新進度百分比
+        percentageSpan.textContent = Math.floor(progress * 100) + '%';
+      }, 50);
+    }
+
+    function stopChickWalking() {
+      const chick = document.getElementById('climbing-chick');
+      const progressText = document.getElementById('climb-progress');
+      
+      if (chickAnimationInterval) {
+        clearInterval(chickAnimationInterval);
+        chickAnimationInterval = null;
+      }
+      chick.style.animation = 'none';
+      document.getElementById('climb-wing-left').style.animation = 'none';
+      document.getElementById('climb-wing-right').style.animation = 'none';
+      document.getElementById('climb-left-foot').style.animation = 'none';
+      document.getElementById('climb-right-foot').style.animation = 'none';
+      
+      // 暫停時隱藏進度
+      if (!isRunning) {
+        progressText.style.display = 'none';
+      }
+    }
 
     function playCompletionSound() {
       // 使用視覺動畫提示完成
@@ -144,6 +269,8 @@
       document.getElementById('pause-btn').style.display = 'inline-block';
       document.getElementById('completion-message').style.display = 'none';
       
+      startChickWalking();
+      
       timerInterval = setInterval(() => {
         remainingSeconds--;
         updateDisplay();
@@ -160,6 +287,7 @@
       clearInterval(timerInterval);
       document.getElementById('start-btn').style.display = 'inline-block';
       document.getElementById('pause-btn').style.display = 'none';
+      stopChickWalking();
     }
 
     function stopTimer() {
@@ -167,6 +295,7 @@
       clearInterval(timerInterval);
       document.getElementById('start-btn').style.display = 'inline-block';
       document.getElementById('pause-btn').style.display = 'none';
+      stopChickWalking();
     }
 
     function resetTimer() {
@@ -174,6 +303,13 @@
       remainingSeconds = selectedMinutes * 60;
       updateDisplay();
       document.getElementById('completion-message').style.display = 'none';
+      
+      // 重置小雞位置到起點
+      const chick = document.getElementById('climbing-chick');
+      chick.style.left = '0px';
+      chick.style.bottom = '0px';
+      chick.style.transform = 'rotate(0deg)';
+      document.getElementById('climb-percentage').textContent = '0%';
     }
 
     function showCompletion() {
@@ -337,5 +473,5 @@
       onConfigChange(defaultConfig);
     }
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aead58860804a6c',t:'MTc2NTg1MzAxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9aeadcc7217a4a6c',t:'MTc2NTg1MzMxMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
